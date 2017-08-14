@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,10 +20,34 @@ public class MainActivity extends AppCompatActivity {
         clk2 = (Button) findViewById(R.id.pauseid);
         clk3 = (Button) findViewById(R.id.stopid);
 
-     
+        clk1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, " Play ", Toast.LENGTH_SHORT).show();
+                mdk.start();
+            }
+        });
+
+
+        clk2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, " pause ", Toast.LENGTH_SHORT).show();
+                mdk.pause();
+            }
+        });
+
+        clk3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, " Stop ", Toast.LENGTH_SHORT).show();
+                mdk.stop();
+                mdk = MediaPlayer.create(MainActivity.this, R.raw.hanuman);
+            }
+        });
         mdk = MediaPlayer.create(MainActivity.this,R.raw.hanuman);
     }
-
+/*
     public void clkplay(View v)
     {
         mdk.start();
@@ -37,5 +62,5 @@ public class MainActivity extends AppCompatActivity {
     {
         mdk.stop();
         mdk = MediaPlayer.create(MainActivity.this,R.raw.hanuman);
-    }
+    }*/
 }
