@@ -15,4 +15,16 @@ public class SongInfo {
         this.artistName = artistName;
         this.songurl = songurl;
     }
+
+    public String getSongName() {
+        return songName;
+    }
+
+    public String getArtistName() {
+        return artistName;
+    }
+
+    public String getSongurl() {
+        return songurl;
+    }
 }
