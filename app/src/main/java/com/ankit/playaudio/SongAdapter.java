@@ -19,9 +19,19 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     ArrayList<SongInfo> songs;
     Context context;
 
+    OnitemClickListener onitemClickListener;
+
     SongAdapter(Context context, ArrayList<SongInfo> songs){
         this.context = context;
         this.songs = songs;
+    }
+
+    public interface OnitemClickListener {
+        void onItemClick(Button b ,View v , SongInfo obj, int position);
+    }
+
+    public void setOnitemClickListener(OnitemClickListener onitemClickListener) {
+        this.onitemClickListener = onitemClickListener;
     }
 
     @Override
@@ -31,8 +41,18 @@ public class SongAdapter extends RecyclerView.Adapter<SongAdapter.SongHolder> {
     }
 
     @Override
-    public void onBindViewHolder(SongHolder holder, int position) {
-
+    public void onBindViewHolder(final SongHolder holder, final int position) {
+        final SongInfo c = songs.get(position);
+        holder.songName.setText(c.songName);
+        holder.artistName.setText(c.artistName);
+        holder.btnAction.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                if(onitemClickListener != null){
+                    onitemClickListener.onItemClick(holder.btnAction, v, c, position);
+                }
+            }
+        });
     }
 
     @Override
