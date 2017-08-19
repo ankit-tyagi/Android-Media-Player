@@ -1,7 +1,14 @@
 package com.ankit.playaudio;
 
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -9,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,7 +75,52 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
+        CheckPermission();
     }
 
+    private void CheckPermission(){
+        if(Build.VERSION.SDK_INT >= 23) {
+
+            if(ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE} ,123 );
+                return;
+            }
+
+        }
+        else {
+            loadsongs();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case 123:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    loadsongs();
+                }
+                else {
+                    Toast.makeText(this,"Permission Denied",Toast.LENGTH_SHORT).show();
+                    CheckPermission();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        }
+    }
+
+    private void loadsongs() {
+        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+        String selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0";
+        Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
+
+        if(cursor!=null) {
+            if(cursor.moveToFirst()){
+                String name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                String url = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+            }
+        }
+    }
 }
