@@ -21,7 +21,6 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<SongInfo> songs = new ArrayList<SongInfo>();
@@ -29,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     SeekBar seekBar;
     SongAdapter songAdapter;
     MediaPlayer mediaPlayer;
-
+    android.os.Handler handler = new android.os.Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,46 +49,60 @@ public class MainActivity extends AppCompatActivity {
 
         songAdapter.setOnitemClickListener(new SongAdapter.OnitemClickListener() {
             @Override
-            public void onItemClick(final Button b, View v, SongInfo obj, int position) {
-                try{
+            public void onItemClick(final Button b, View v, final SongInfo obj, int position) {
 
-                    if(b.getText().toString().equals("Stop")){
-                        b.setText("Play");
-                        mediaPlayer.stop();
-                        mediaPlayer.reset();
-                        mediaPlayer.release();
-                        mediaPlayer = null;
-                    }
-                    else{
-                        mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setDataSource(obj.getSongurl());
-                        mediaPlayer.prepareAsync();
-                        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                            @Override
-                            public void onPrepared(MediaPlayer mp) {
-                                mp.start();
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        try{
+
+                            if(b.getText().toString().equals("Stop")){
+                                b.setText("Play");
+                                mediaPlayer.stop();
+                                mediaPlayer.reset();
+                                mediaPlayer.release();
+                                mediaPlayer = null;
+                            }
+                            else{
+                                mediaPlayer = new MediaPlayer();
+                                mediaPlayer.setDataSource(obj.getSongurl());
+                                mediaPlayer.prepareAsync();
+                                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                    @Override
+                                    public void onPrepared(MediaPlayer mp) {
+                                        seekBar.setProgress(0);
+                                        seekBar.setMax(mp.getDuration());
+                                        mp.start();
+                                    }
+                                });
                                 b.setText("Stop");
                             }
-                        });
+                        }catch (IOException e){}
                     }
-                }catch (IOException e){}
+                };
+                handler.postDelayed(r,100);
 
             }
         });
         checkUserPermission();
+        Thread t= new MyThread();
+        t.start();
     }
 
-    /*private void CheckUserPermission(){
-        if(Build.VERSION.SDK_INT >= 23) {
-            //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123 );
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                //requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123 );
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},123);
-                return;
+    public class MyThread extends Thread{
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+                if(mediaPlayer != null){
+                    seekBar.setProgress(mediaPlayer.getCurrentPosition());
+                    }
+                } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        loadsongs();
-    }*/
+    }
+
     private void checkUserPermission(){
         if(Build.VERSION.SDK_INT>=23){
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
